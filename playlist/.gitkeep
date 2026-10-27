@@ -1,0 +1,4 @@
+Drop music here. Anything that is not .ogg needs tools/playlist.sh run over it
+first: Luanti decodes Ogg Vorbis only, and world-mode speakers need mono.
+
+The contents of this directory are gitignored.

@@ -1,0 +1,94 @@
+[Stream source]
+
+#    Directory the encoder writes chunks into, relative to the world directory.
+#    One subdirectory per stream; the subdirectory name is the stream id.
+speakerbox.chunk_dir (Chunk directory, inside the world) string speakerbox
+
+#    How the mod tells a finished chunk from one still being written.
+#    manifest: only files listed in chunks.list are finished (ffmpeg -segment_list)
+#    lag:      the highest-numbered file is still being written, the rest are done
+#              (works with any sequential writer, costs one chunk of latency)
+#    all:      every file present is finished (the writer renames into place)
+speakerbox.ready_mode (How a finished chunk is recognised) enum manifest manifest,lag,all
+
+#    Must match the encoder's segment length.
+speakerbox.chunk_seconds (Nominal chunk length) float 6.0 0.5 60.0
+
+#    Time between pushing a chunk and sounding it. This is the budget for
+#    getting the bytes to every client, and it is most of the added latency.
+speakerbox.lead_seconds (Head start for delivery) float 2.0 0.0 30.0
+
+#    Each chunk starts this early and the previous one is faded out over the
+#    same time, so a seam sounds like a soft blend rather than a click. 0 turns
+#    both off, which trades the blend for a gap whenever delivery is late.
+speakerbox.blend_seconds (Crossfade at each seam) float 0.08 0.0 1.0
+
+#    A live stream that falls behind skips to the newest chunk. Turn this off
+#    for a playlist, where every chunk should be heard in order.
+speakerbox.live (Skip ahead to stay near live) bool true
+
+speakerbox.max_backlog (Chunks allowed to pile up before a live stream skips) int 2 1 100
+
+speakerbox.scan_interval (Seconds between directory scans) float 0.25 0.05 5.0
+
+[Speakers]
+
+#    world: positional. The client pans and attenuates it (1/distance).
+#           Chunks MUST be mono -- see README.
+#    room:  locationless, with the gain computed here from distance, so the
+#           falloff curve is ours. No stereo placement, one sound per listener.
+speakerbox.default_mode (Mode for a new speaker) enum world world,room
+
+speakerbox.default_gain (Gain for a new speaker) float 1.0 0.0 4.0
+
+speakerbox.default_radius (Radius for a new speaker, in nodes) float 48.0 1.0 200.0
+
+#    Fraction of the radius that stays at full volume in room mode.
+speakerbox.room_knee (Flat part of the room-mode curve) float 0.6 0.0 0.99
+
+speakerbox.max_radius (Largest radius without the server privilege) float 96.0 1.0 500.0
+
+[Clients]
+
+#    Chunks are throwaway, so the default asks clients not to keep them on
+#    disk. Clients older than 5.12.0 read this hint inverted and will cache
+#    them anyway; their media cache is safe to delete.
+speakerbox.client_cache (Let clients cache chunks on disk) bool false
+
+speakerbox.warn_old_clients (Tell a too-old client once why it hears nothing) bool true
+
+#    Stream a newly placed speaker is set to, and the one directory the mod
+#    creates for you on startup.
+speakerbox.default_stream (Stream for a new speaker) string live
+
+#    Skip the 'speaker' privilege check, so any player can configure a
+#    speaker. For a private or dev server.
+speakerbox.open_access (Let anyone configure speakers) bool false
+
+[Playlists]
+
+#    Where whole-track playlists live. Blank means the mod's own playlist/
+#    directory, which is the one you can drop files into without having to
+#    find the world directory. An absolute path is used as given; anything
+#    else is relative to the world, like the chunk directory.
+speakerbox.playlist_dir (Playlist directory) string
+
+#    Tracks are played in filename order unless this is set, which is why
+#    naming them 01-..., 02-... works. The shuffle is seeded per stream, so it
+#    is a different order each run but a stable one within a run.
+speakerbox.playlist_shuffle (Shuffle) bool false
+
+speakerbox.playlist_loop (Start again at the end) bool true
+
+#    Tracks are crossfaded over this, which also sets the fade-in of the first
+#    one. 0 cuts between them.
+speakerbox.track_crossfade (Crossfade between tracks) float 1.0 0.0 10.0
+
+speakerbox.playlist_rescan (Seconds between re-reading the directory) float 10.0 1.0 300.0
+
+#    Unlike a chunk, a track comes round again, and a client's media cache is
+#    keyed by content -- so caching makes the second time round free.
+speakerbox.playlist_client_cache (Let clients cache tracks on disk) bool true
+
+#    What a newly placed speaker points at.
+speakerbox.default_kind (Source kind for a new speaker) enum stream stream,playlist

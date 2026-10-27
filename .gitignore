@@ -1,0 +1,21 @@
+# The playlist directory ships empty: what goes in it is whoever's music, and
+# tools/playlist.sh writes a .ogg next to every source file it converts.
+playlist/*
+!playlist/.gitkeep
+
+# Chunk directories written by tools/encode.sh. These normally live under
+# <world>/speakerbox/<stream>, but the script takes any path, so ignore the
+# shape it produces: eight-digit segments plus the manifest ffmpeg appends to.
+chunks.list
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].ogg
+
+# tests/fixtures/*.ogg is deliberately not ignored -- test_oggmeta and
+# test_pump read those two files.
+
+# Editor and OS droppings
+*~
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
